@@ -7,7 +7,7 @@ type Cell = ((Int, Int), State)
 type Coordinate = (Int,Int)
 type Grid = [Cell]
 
--- globals
+-- Globals. Set according to my 13.3" screen
 width :: Int
 width = 50
 
@@ -37,8 +37,8 @@ neighbours (x, y) = filter inBound [(x + dx, y + dy) | dx <- [-1..1], dy <- [-1.
     where inBound = (\(u,v) -> (u,v) /= (x,y) && u >= 0 && v >= 0 && u <= height && v <= width)
 
 -- Determine next state of a cell
-nextState :: Cell -> Grid -> State
-nextState ((x,y),state) grid
+nextCellState :: Cell -> Grid -> State
+nextCellState ((x,y),state) grid
     | 2 == countAlive && Alive == state = Alive
     | 3 == countAlive                   = Alive
     | otherwise                         = Dead
@@ -46,9 +46,9 @@ nextState ((x,y),state) grid
           filterAlive = filter (\pos -> Alive == (getStateAt pos grid))
 
 -- Evolve the grid with one generation
-update :: Grid -> Grid
-update grid = map nextCell grid
-    where nextCell = (\(pos,state) -> (pos, (nextState (pos,state) grid)))
+evolve :: Grid -> Grid
+evolve grid = map nextCell grid
+    where nextCell = (\(pos,state) -> (pos, (nextCellState (pos,state) grid)))
 
 -- Transform the grid to a string
 toString :: Grid -> String
@@ -70,7 +70,7 @@ toStringHelper grid = Text.intercalate (Text.singleton '\n') (rows 0)
 -- Draw the grid in the terminal
 draw :: Grid -> IO()
 draw grid = do
-  let updatedGrid = update grid
+  let updatedGrid = evolve grid
   clearScreen
   putStr $ toString updatedGrid
   putStr "\n\n"
